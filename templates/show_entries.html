@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
+      <dl>
+        <dt>Name:
+        <dd><input type=text size=30 name=name>
+	<dt>Age:
+        <dd><input type=number size=5 name=age>
+        <dt>Mail:
+        <dd><input type=text size=30 name=mail>
+	<dt>Other info:
+        <dd><textarea name=text rows=5 cols=40></textarea>
+        <dd><input type=submit value="Add monkey">
+      </dl>
+    </form>
+  {% endif %}
+{% if (sort is defined) %}
+	{% if(page > 1) %}
+	<a href="{{ url_for('show_entries', page=page-1, sort=sort) }}">Previous Page |</a>
+	{% endif %}
+	{% if(entries|length > (page-1)*3+3) %}
+	<a href="{{ url_for('show_entries', page=page+1, sort=sort) }}">| Next Page</a><br>
+	{% endif %}
+{% else %}
+	{% if(page > 1) %}
+	<a href="{{ url_for('show_entries', page=page-1) }}">Previous Page |</a>
+	{% endif %}
+	{% if(entries|length > (page-1)*3+3) %}
+	<a href="{{ url_for('show_entries', page=page+1) }}">| Next Page</a><br>
+	{% endif %}
+
+{% endif %}
+<p>Sort by: <a href="{{ url_for('show_entries', page=page, sort='id') }}">Id</a>, <a href="{{ url_for('show_entries', page=page, sort='age') }}">Age</a>, <a href="{{ url_for('show_entries', page=page, sort='name') }}">Name</a>, <a href="{{ url_for('show_entries', page=page, sort='best') }}">Best Friend</a>, <a href="{{ url_for('show_entries', page=page, sort='friend') }}">Number of friends</a></p>
+  <ul class=entries>
+  {% for entry in entries[(page-1)*3:(page-1)*3+3] %}
+    <li><h2><a href="{{ url_for('profile', mail=entry.mail) }}">{{ entry.name }}</a></h2><strong>Email address: </strong>{{ entry.mail }}<br><strong>Best friend: </strong>{{ entry.best }}<br><strong>Friends: </strong>{{ entry.friend }}<br><strong>Other info: </strong>{{ entry.text|safe }}
+   {% else %}
+    <li><em>Unbelievable.  No monkies here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}

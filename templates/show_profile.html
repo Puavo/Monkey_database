@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block body %}
+{% if session.logged_in %}
+      <h2>Edit profile of {{ entry.name }}</h2>
+      <form action="{{ url_for('edit_entry') }}" method=post class=add-entry>
+      <dl>
+        <dt>Name:
+        <dd><input type=text size=30 name=name value="{{ entry.name }}">
+	<dt>Age:
+        <dd><input type=number size=5 name=age value="{{ entry.age }}">
+        <dt>Mail:
+        <dd><input type=text size=30 name=mail value="{{ entry.mail }}">
+	<dt>Other info:
+        <dd><textarea name=text rows=5 cols=40">{{ entry.text }}</textarea>
+        <dd><input type=submit value="Edit monkey">
+	<input type=hidden name=oldmail value="{{ entry.mail }}">
+      </dl>
+    </form>
+
+    <form action="{{ url_for('delete_entry') }}" method=post >
+    <input type=hidden name=mail value="{{ entry.mail }}">
+    <input type=submit value="Delete monkey">
+    </form>
+{% endif %}
+<ul class=entries>
+    <li><h2>Profile of {{ entry.name }}</a></h2></li>
+    <li><strong>Email address: </strong>{{ entry.mail }}</li>
+    <li><strong>Age: </strong>{{ entry.age }}</li>
+    <li><strong>Best Friend: </strong>{{ entry.best }}</li>
+    <li><strong>Friends: </strong>{{ friends|length }}</li>
+    <li><strong>Other info: </strong>{{ entry.text|safe }}</li>
+</ul>
+<h2>Friends of {{entry.name}}:</h2>
+<ul class=entries>
+{% if session.logged_in and entry.best %}
+	<li><a href="{{ url_for('make_best', mail=entry.mail) }}">Remove best friend</a>
+{% endif %}
+{% if friends|length == 0 %}
+	<li>{{entry.name}} has no friends.
+{% endif %}
+{% if session.logged_in and friends|length > 0 %}
+	<li>Click name to unfriend.
+{% endif %}
+
+{% for monkey in friends %}
+   {% if session.logged_in %}
+	<li><a href="{{ url_for('delete_friends', friend1=monkey.mail, friend2=entry.mail) }}">{{monkey.name}}: {{monkey.mail}}</a> - 
+	<a href="{{ url_for('make_best', mail=entry.mail, best=monkey.mail) }}">Set to best friend</a>
+   {% else %}
+	<li>{{monkey.name}}: {{monkey.mail}}
+   {% endif %}
+{% endfor %}
+</ul>
+
+{% if session.logged_in and nonfriends|length > 0 %}
+	<h2>Other monkeys:</h2>
+	<ul class=entries>
+	<li>Click to make friends.
+	{% for monkey in nonfriends %}
+		<li><a href="{{ url_for('add_friends', friend1=monkey.mail, friend2=entry.mail) }}">{{monkey.name}}: {{monkey.mail}}</a>
+	{% endfor %}
+	</ul>
+{% endif %}
+<a href="{{ url_for('show_entries') }}">Back to listing</a>
+{% endblock %}
