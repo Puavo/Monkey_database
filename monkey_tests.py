@@ -126,14 +126,26 @@ class monkeyTestCase(unittest.TestCase):
 	rv = self.app.get('/')
         assert b'<strong>Friends: </strong>0' not in rv.data
         assert b'<strong>Friends: </strong>1' in rv.data
-	# Remove friendship
+	# Paavo thinks that Kamu is his best friend
+	rv =  self.app.get('/best/kamu.kiva%40monkey.fi&paavo.kivisto%40gmail.com', follow_redirects=True)
+	assert b'<strong>Best Friend: </strong>None' not in rv.data
+        assert b'<strong>Best Friend: </strong>kamu.kiva@monkey.fi' in rv.data
+	# Remove friendship. That should remove the best friend, too.
 	rv = self.app.get('/delfriends/kamu.kiva%40monkey.fi&paavo.kivisto%40gmail.com', follow_redirects=True)
+	assert b'<strong>Best Friend: </strong>None' in rv.data
 	assert b'has no friends.' in rv.data
         assert b'<strong>Friends: </strong>0' in rv.data
 	rv = self.app.get('/')
         assert b'<strong>Friends: </strong>0' in rv.data
         assert b'<strong>Friends: </strong>1' not in rv.data
-
+	# Add friendship and best friend status back
+	self.app.get('/friends/kamu.kiva%40monkey.fi&paavo.kivisto%40gmail.com')
+	self.app.get('/best/kamu.kiva%40monkey.fi&paavo.kivisto%40gmail.com')
+	# Remove monkey to see that you don't have deleted friends
+	rv = self.app.post('/delete', data=dict(mail='kamu.kiva@monkey.fi'), follow_redirects=True)
+	assert b'<strong>Best friend: </strong>None' in rv.data
+	assert b'<strong>Friends: </strong>0' in rv.data
+        assert b'<strong>Friends: </strong>1' not in rv.data
 
 if __name__ == '__main__':
     unittest.main()
