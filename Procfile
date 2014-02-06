@@ -1,1 +1,1 @@
-web: gunicorn monkey_sqlite:app
+web: gunicorn monkeysql:app
