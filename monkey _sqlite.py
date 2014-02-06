@@ -17,18 +17,13 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 
-import os
-import psycopg2
-import urlparse
 
 # create our little application :)
 app = Flask(__name__)
 
 # Load default config and override config from an environment variable
-urlparse.uses_netloc.append("postgres")
-url = urlparse.urlparse(os.environ["DATABASE_URL"])
 app.config.update(dict(
-    DATABASE=url,
+    DATABASE='monkey.db',
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
@@ -37,18 +32,10 @@ app.config.update(dict(
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
-
 def connect_db():
     """Connects to the specific database."""
-    rv = psycopg2.connect(
-      database=url.path[1:],
-      user=url.username,
-      password=url.password,
-      host=url.hostname,
-      port=url.port
-    )
-    #rv = sqlite3.connect(app.config['DATABASE'])
-    #rv.row_factory = sqlite3.Row
+    rv = sqlite3.connect(app.config['DATABASE'])
+    rv.row_factory = sqlite3.Row
     return rv
 
 
